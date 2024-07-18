@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="D:/internship/corona_virus_analysis.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="1088"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><current_table name="4,11:maincorona_data"/><default_encoding codec=""/><browse_table_settings/></tab_browse><tab_sql><sql name="SQL 1">-- Q1. Write a code to check NULL values
+SELECT
+    SUM(CASE WHEN Province IS NULL THEN 1 ELSE 0 END) AS Null_Province,
+    SUM(CASE WHEN &quot;Country/Region&quot; IS NULL THEN 1 ELSE 0 END) AS Null_Country_Region,
+    SUM(CASE WHEN Latitude IS NULL THEN 1 ELSE 0 END) AS Null_Latitude,
+    SUM(CASE WHEN Longitude IS NULL THEN 1 ELSE 0 END) AS Null_Longitude,
+    SUM(CASE WHEN Date IS NULL THEN 1 ELSE 0 END) AS Null_Date,
+    SUM(CASE WHEN Confirmed IS NULL THEN 1 ELSE 0 END) AS Null_Confirmed,
+    SUM(CASE WHEN Deaths IS NULL THEN 1 ELSE 0 END) AS Null_Deaths,
+    SUM(CASE WHEN Recovered IS NULL THEN 1 ELSE 0 END) AS Null_Recovered
+FROM Corona_Data;</sql><sql name="SQL 2">-- Q2. If NULL values are present, update them with zeros for all columns.
+
+-- THERE IS NO NULL VALULES PRESENT IN THE DATASET</sql><sql name="SQL 3">-- Q3. check total number of rows
+SELECT COUNT(*) AS Total_Rows
+FROM corona_data;</sql><sql name="SQL 4">-- Q4. Check what is start_date and end_date
+SELECT MIN(Date) AS start_date, 
+	   MAX(Date) AS end_date 
+FROM corona_data;</sql><sql name="SQL 5">-- Q5. Number of month present in dataset
+SELECT COUNT(DISTINCT strftime('%m', Date)) AS Num_Months
+    FROM corona_data</sql><sql name="SQL 6">-- Q6. Find monthly average for confirmed, deaths, recovered
+SELECT strftime('%m',Date) AS MONTH,
+	   ROUND(AVG(Confirmed),2) AS Avg_Confirmed,
+	   ROUND(AVG(Deaths),2) AS Avg_Deaths,
+	   ROUND(AVG(Recovered),2) AS Avg_Recovered
+FROM corona_data
+GROUP BY strftime('%m',Date);	   </sql><sql name="SQL 7">-- Q7. Find most frequent value for confirmed, deaths, recovered each month
+SELECT Month, Confirmed, Frequency
+FROM (
+    SELECT strftime('%m', Date) AS Month,
+           Confirmed,
+           COUNT(*) AS Frequency,
+           ROW_NUMBER() OVER(PARTITION BY strftime('%m', Date) ORDER BY COUNT(*) DESC) AS RowNum
+    FROM corona_data
+    GROUP BY strftime('%m', Date), Confirmed
+) AS T
+WHERE RowNum = 1;</sql><sql name="SQL 8">-- Q8. Find minimum values for confirmed, deaths, recovered per year
+SELECT SUBSTR(Date, 1, 4) AS Year, 
+  MIN(Confirmed) AS Min_Confirmed, 
+  MIN(Deaths) AS Min_Deaths, 
+  MIN(Recovered) AS Min_Recovered
+  FROM corona_data
+  GROUP BY Year;</sql><sql name="SQL 9">-- Q9. Find maximum values of confirmed, deaths, recovered per year
+SELECT SUBSTR(Date, 1, 4) AS Year, 
+  MAX(Confirmed) AS Max_Confirmed, 
+  MAX(Deaths) AS Max_Deaths, 
+  MAX(Recovered) AS Max_Recovered
+  FROM corona_data
+  GROUP BY Year;</sql><sql name="SQL 10">-- Q10. The total number of case of confirmed, deaths, recovered each month
+SELECT strftime('%m',Date) AS Month,
+       SUM(Confirmed) AS Total_Confirmed,
+       SUM(Deaths) AS Total_Deaths,
+       SUM(Recovered) AS Total_Recovered
+FROM corona_data
+GROUP BY Month;</sql><sql name="SQL 11">-- Q11. Identify the top 10 countries/regions with the highest number of confirmed cases.
+SELECT &quot;Country/Region&quot;, SUM(Confirmed) AS Total_Confirmed
+FROM corona_data
+GROUP BY &quot;Country/Region&quot;
+ORDER BY Total_Confirmed DESC
+LIMIT 10;</sql><sql name="SQL 12">-- Q12. Calculate the daily average number of new confirmed cases globally.
+SELECT ROUND(AVG(Daily_cases),2) AS Avg_Daily_newCases
+FROM (
+    SELECT Date, SUM(Confirmed) AS Daily_cases
+	FROM corona_data
+	GROUP BY Date 
+)AS global_daily_cases;
+  </sql><sql name="SQL 13">-- Q13. Determine the mortality rate (percentage) for each country/region.
+SELECT &quot;Country/Region&quot;,
+      SUM(Deaths) AS Total_Deaths,
+      sum(Confirmed) AS Total_Confirmed,
+      ROUND((cast(sum(Deaths)  AS FLOAT)/ sum(Confirmed)) * 100, 2) AS Mortality_Rate
+FROM corona_data
+GROUP BY &quot;Country/Region&quot;;</sql><sql name="SQL 14">-- Q14. Find Country having highest number of the Confirmed case
+SELECT &quot;Country/Region&quot;, MAX(Confirmed) AS Max_Confirmed
+FROM corona_data;</sql><sql name="SQL 15">-- Q15. Find Country having lowest number of the death case
+SELECT &quot;Country/Region&quot;, MIN(Deaths) AS Min_Deaths
+FROM corona_data;</sql><sql name="SQL 16">-- Q16. Find top 5 countries having highest recovered case
+SELECT &quot;Country/Region&quot;, MAX(Recovered) AS Max_Recovered
+FROM corona_data
+GROUP BY &quot;Country/Region&quot;
+ORDER BY Max_Recovered DESC
+LIMIT 5;</sql><current_tab id="15"/></tab_sql></sqlb_project>
